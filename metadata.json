@@ -1,0 +1,6 @@
+{
+  "name": "Apex Minds – The Architecture of Success",
+  "description": "A minimalist, high-speed editorial blog profiling history's most successful minds, their mental models, strategic breakthroughs, and timeless lessons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
