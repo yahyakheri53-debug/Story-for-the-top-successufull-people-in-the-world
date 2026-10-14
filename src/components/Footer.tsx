@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Check, Sparkles, Heart } from 'lucide-react';
+import { Send, Check, Sparkles, BookOpen } from 'lucide-react';
 
 interface FooterProps {
   onSelectCategory: (category: string) => void;
@@ -10,6 +10,7 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({
   onSelectCategory,
   onOpenContact,
+  onSelectArticle,
 }) => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -28,12 +29,19 @@ export const Footer: React.FC<FooterProps> = ({
     }
   };
 
+  const topStudies = [
+    { name: 'Steve Jobs: Relentless Focus', slug: 'steve-jobs' },
+    { name: 'Marie Curie: The Anatomy of Grit', slug: 'marie-curie' },
+    { name: 'Warren Buffett: Rational Compounding', slug: 'warren-buffett' },
+    { name: 'Jensen Huang: High Pain Tolerance', slug: 'jensen-huang' },
+  ];
+
   return (
     <footer className="mt-20 border-t border-stone-200 dark:border-stone-800 bg-stone-100/50 dark:bg-stone-900/40 text-stone-600 dark:text-stone-400">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Brand & Manifesto */}
-          <div className="md:col-span-5 space-y-4">
+          <div className="md:col-span-4 space-y-4">
             <h3 className="font-serif text-lg font-bold text-stone-900 dark:text-stone-100 tracking-tight">
               APEX MINDS
             </h3>
@@ -46,8 +54,31 @@ export const Footer: React.FC<FooterProps> = ({
             </div>
           </div>
 
-          {/* Disciplines */}
+          {/* Featured Case Studies (Clean Internal Links) */}
           <div className="md:col-span-3 space-y-3">
+            <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100 uppercase tracking-wider">
+              Featured Studies
+            </h4>
+            <ul className="space-y-2 text-xs">
+              {topStudies.map((study) => (
+                <li key={study.slug}>
+                  <a
+                    href={`/${study.slug}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onSelectArticle(study.slug);
+                    }}
+                    className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+                  >
+                    {study.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Disciplines */}
+          <div className="md:col-span-2 space-y-3">
             <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100 uppercase tracking-wider">
               Disciplines
             </h4>
@@ -60,7 +91,7 @@ export const Footer: React.FC<FooterProps> = ({
                       onSelectCategory(cat);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+                    className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors cursor-pointer"
                   >
                     {cat}
                   </button>
@@ -70,7 +101,7 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           {/* Newsletter Dispatch */}
-          <div className="md:col-span-4 space-y-3">
+          <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100 uppercase tracking-wider">
               The Weekly Dispatch
             </h4>
