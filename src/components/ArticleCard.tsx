@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bookmark, ArrowUpRight } from 'lucide-react';
 import { Article } from '../data/articles';
 import { ARTICLE_IMAGES } from '../assets/articleImages';
@@ -17,30 +17,42 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
   onSelectArticle,
 }) => {
   const imageMeta = ARTICLE_IMAGES[article.imageKey] || ARTICLE_IMAGES['steve-jobs'];
+  const [imgSrc, setImgSrc] = useState(imageMeta.src);
+
+  useEffect(() => {
+    setImgSrc(imageMeta.src);
+  }, [imageMeta.src]);
 
   return (
     <article className="group relative flex flex-col justify-between rounded-xl bg-white dark:bg-stone-900/70 border border-stone-200/80 dark:border-stone-800/80 hover:border-stone-300 dark:hover:border-stone-700 transition-all duration-200 shadow-xs hover:shadow-md overflow-hidden">
-      {/* Visual Image Preview with Alt Text (<200KB) */}
+      {/* Real / Editorial Stock Photograph with Alt Text (<200KB) */}
       <a
         href={`/${article.slug}`}
         onClick={(e) => {
           e.preventDefault();
           onSelectArticle(article.slug);
         }}
-        className="block relative overflow-hidden aspect-16/9 bg-stone-100 dark:bg-stone-800"
+        className="block relative overflow-hidden aspect-16/10 bg-stone-100 dark:bg-stone-800"
         tabIndex={-1}
         aria-hidden="true"
       >
         <img
-          src={imageMeta.svgDataUri}
+          src={imgSrc}
+          onError={() => {
+            if (imgSrc !== imageMeta.fallbackSrc) {
+              setImgSrc(imageMeta.fallbackSrc);
+            }
+          }}
           alt={imageMeta.alt}
           width={400}
-          height={225}
-          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+          height={250}
+          className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
           loading="lazy"
         />
-        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-mono bg-stone-900/80 text-stone-200 backdrop-blur-xs">
-          {imageMeta.fileSizeKb} KB
+        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-mono bg-stone-900/85 text-stone-200 backdrop-blur-xs flex items-center gap-1.5">
+          <span>{imageMeta.fileName}</span>
+          <span aria-hidden="true">·</span>
+          <span className="text-emerald-400 font-semibold">{imageMeta.fileSizeKb} KB</span>
         </div>
       </a>
 

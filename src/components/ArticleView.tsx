@@ -14,7 +14,6 @@ import {
   ArrowRight,
   ExternalLink,
   Link2,
-  FileText,
   Table as TableIcon,
 } from 'lucide-react';
 import { Article, ARTICLES } from '../data/articles';
@@ -41,6 +40,11 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const imageMeta = ARTICLE_IMAGES[article.imageKey] || ARTICLE_IMAGES['steve-jobs'];
+  const [currentImgSrc, setCurrentImgSrc] = useState(imageMeta.src);
+
+  useEffect(() => {
+    setCurrentImgSrc(imageMeta.src);
+  }, [imageMeta.src]);
 
   // Scroll progress listener
   useEffect(() => {
@@ -274,20 +278,25 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           </div>
         </header>
 
-        {/* RULE 5: Optimized Image with descriptive alt text for Google and screen reader users (< 200kb) */}
+        {/* RULE 5: Real historical / documentary photograph (No AI stock), compressed under 200KB, with descriptive alt text for Google and blind users */}
         <figure className="my-8 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900">
           <img
-            src={imageMeta.svgDataUri}
+            src={currentImgSrc}
+            onError={() => {
+              if (currentImgSrc !== imageMeta.fallbackSrc) {
+                setCurrentImgSrc(imageMeta.fallbackSrc);
+              }
+            }}
             alt={imageMeta.alt}
             width={800}
             height={500}
-            className="w-full h-auto object-cover max-h-[420px]"
+            className="w-full h-auto object-cover max-h-[460px]"
             loading="eager"
           />
           <figcaption className="p-3 bg-stone-50 dark:bg-stone-950/70 border-t border-stone-200 dark:border-stone-800/80 text-xs text-stone-600 dark:text-stone-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <span>{imageMeta.caption}</span>
             <div className="flex items-center gap-2 text-[11px] text-stone-400 font-mono shrink-0">
-              <span>{imageMeta.fileName}</span>
+              <span className="font-semibold text-stone-700 dark:text-stone-300">{imageMeta.fileName}</span>
               <span aria-hidden="true">·</span>
               <span className="text-emerald-700 dark:text-emerald-400">{imageMeta.fileSizeKb} KB (&lt;200KB)</span>
             </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Bookmark, Sparkles } from 'lucide-react';
 import { Article } from '../data/articles';
 import { ARTICLE_IMAGES } from '../assets/articleImages';
@@ -17,6 +17,11 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({
   onSelectArticle,
 }) => {
   const imageMeta = ARTICLE_IMAGES[article.imageKey] || ARTICLE_IMAGES['steve-jobs'];
+  const [imgSrc, setImgSrc] = useState(imageMeta.src);
+
+  useEffect(() => {
+    setImgSrc(imageMeta.src);
+  }, [imageMeta.src]);
 
   return (
     <section className="mb-12 border-b border-stone-200 dark:border-stone-800 pb-12">
@@ -71,7 +76,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({
                   e.preventDefault();
                   onSelectArticle(article.slug);
                 }}
-                className="px-5 py-2.5 rounded-lg bg-stone-900 dark:bg-amber-400 text-stone-100 dark:text-stone-950 font-medium text-xs sm:text-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2 shadow-xs"
+                className="px-5 py-2.5 rounded-lg bg-stone-900 dark:bg-amber-400 text-stone-100 dark:text-stone-950 font-medium text-xs sm:text-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2 shadow-xs cursor-pointer"
               >
                 <span>Read Case Study</span>
                 <ArrowRight className="w-4 h-4" />
@@ -92,7 +97,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({
             </div>
           </div>
 
-          {/* Lead Image Display with Descriptive Alt and Compression Check (<200KB) */}
+          {/* Lead Real / Editorial Stock Image Display with Descriptive Alt and Compression Check (<200KB) */}
           <div className="lg:col-span-5">
             <figure className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-800/50 shadow-sm">
               <a
@@ -101,23 +106,32 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({
                   e.preventDefault();
                   onSelectArticle(article.slug);
                 }}
-                className="block"
+                className="block aspect-4/3 overflow-hidden bg-stone-100 dark:bg-stone-800"
                 tabIndex={-1}
               >
                 <img
-                  src={imageMeta.svgDataUri}
+                  src={imgSrc}
+                  onError={() => {
+                    if (imgSrc !== imageMeta.fallbackSrc) {
+                      setImgSrc(imageMeta.fallbackSrc);
+                    }
+                  }}
                   alt={imageMeta.alt}
                   width={600}
-                  height={375}
-                  className="w-full h-auto object-cover hover:scale-102 transition-transform duration-300"
+                  height={450}
+                  className="w-full h-full object-cover hover:scale-102 transition-transform duration-300"
                   loading="eager"
                 />
               </a>
-              <figcaption className="p-2.5 bg-stone-50 dark:bg-stone-950 text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between border-t border-stone-200 dark:border-stone-800">
-                <span className="truncate mr-2">{imageMeta.caption}</span>
-                <span className="font-mono text-emerald-700 dark:text-emerald-400 shrink-0">
-                  {imageMeta.fileSizeKb} KB (&lt;200KB)
-                </span>
+              <figcaption className="p-3 bg-stone-50 dark:bg-stone-950 text-xs text-stone-500 dark:text-stone-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 border-t border-stone-200 dark:border-stone-800">
+                <span className="truncate">{imageMeta.caption}</span>
+                <div className="flex items-center gap-2 font-mono text-[11px] shrink-0">
+                  <span className="text-stone-700 dark:text-stone-300">{imageMeta.fileName}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                    {imageMeta.fileSizeKb} KB (&lt;200KB)
+                  </span>
+                </div>
               </figcaption>
             </figure>
           </div>
