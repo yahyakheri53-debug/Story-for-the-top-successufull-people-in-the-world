@@ -14,6 +14,9 @@ import { Footer } from './components/Footer';
 import { ARTICLES, Article } from './data/articles';
 import { Bookmark, Sparkles, Filter, X } from 'lucide-react';
 
+const HOME_SEO_TITLE = "Apex Minds: 10 Success Habits of History's Greatest Leaders"; // 59 chars
+const HOME_SEO_DESCRIPTION = "Explore the 10 proven success principles of history's top achievers. Master focus, resilience, and mental models from legendary pioneers. Read the blueprints now."; // 160 chars
+
 export default function App() {
   // Theme state
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -38,11 +41,13 @@ export default function App() {
     return [];
   });
 
-  // Navigation states
+  // Clean HTML5 URL routing without # symbols or random IDs
   const [activeSlug, setActiveSlug] = useState<string | null>(() => {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const slug = window.location.hash.replace('#', '');
-      if (ARTICLES.some((a) => a.slug === slug)) return slug;
+    if (typeof window !== 'undefined') {
+      const cleanPath = window.location.pathname.replace(/^\/|\/$/g, '');
+      if (cleanPath && ARTICLES.some((a) => a.slug === cleanPath)) {
+        return cleanPath;
+      }
     }
     return null;
   });
@@ -69,19 +74,34 @@ export default function App() {
     localStorage.setItem('apex_minds_bookmarks', JSON.stringify(bookmarks));
   }, [bookmarks]);
 
-  // Sync activeSlug to URL hash for browser history / sharing
+  // Handle Home page SEO title and description when activeSlug is null
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (hash && ARTICLES.some((a) => a.slug === hash)) {
-        setActiveSlug(hash);
-      } else if (!hash) {
+    if (!activeSlug) {
+      document.title = HOME_SEO_TITLE;
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', HOME_SEO_DESCRIPTION);
+      }
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute('content', HOME_SEO_TITLE);
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc) ogDesc.setAttribute('content', HOME_SEO_DESCRIPTION);
+    }
+  }, [activeSlug]);
+
+  // Sync clean browser pathname navigation with popstate (back/forward buttons)
+  useEffect(() => {
+    const handlePopState = () => {
+      const cleanPath = window.location.pathname.replace(/^\/|\/$/g, '');
+      if (cleanPath && ARTICLES.some((a) => a.slug === cleanPath)) {
+        setActiveSlug(cleanPath);
+      } else {
         setActiveSlug(null);
       }
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const toggleTheme = () => {
@@ -94,15 +114,16 @@ export default function App() {
     );
   };
 
+  // Clean navigation with HTML5 History API (no # symbols)
   const handleSelectArticle = (slug: string) => {
     setActiveSlug(slug);
-    window.location.hash = slug;
+    window.history.pushState({ slug }, '', `/${slug}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToHome = () => {
     setActiveSlug(null);
-    window.location.hash = '';
+    window.history.pushState({}, '', '/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -140,7 +161,7 @@ export default function App() {
         showBookmarksOnly={showBookmarksOnly}
         onToggleBookmarksFilter={() => {
           setShowBookmarksOnly((prev) => !prev);
-          setActiveSlug(null);
+          handleBackToHome();
         }}
         onGoHome={handleBackToHome}
       />
@@ -157,7 +178,7 @@ export default function App() {
           />
         ) : (
           <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
-            {/* Editorial Overview Header */}
+            {/* RULE 3: Exactly ONE H1 per page: The Main Topic */}
             <div className="mb-10 text-center sm:text-left">
               <div className="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -168,7 +189,7 @@ export default function App() {
                 <span>10 Monograms on Exceptional Minds</span>
               </div>
               <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-stone-900 dark:text-stone-100 leading-tight">
-                The Anatomy of Remarkable Lives
+                The Anatomy of Remarkable Lives: 10 Success Blueprints
               </h1>
               <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-300 max-w-2xl leading-relaxed">
                 Deconstructing how history and the modern world’s most consequential inventors, leaders, scientists, and investors made decisions, endured failure, and bent reality.
@@ -240,7 +261,7 @@ export default function App() {
                     setSelectedCategory('All');
                     setShowBookmarksOnly(false);
                   }}
-                  className="mt-4 px-4 py-2 text-xs font-medium rounded-lg bg-stone-900 dark:bg-stone-100 text-stone-100 dark:text-stone-900 hover:opacity-90"
+                  className="mt-4 px-4 py-2 text-xs font-medium rounded-lg bg-stone-900 dark:bg-stone-100 text-stone-100 dark:text-stone-900 hover:opacity-90 cursor-pointer"
                 >
                   Show All 10 Essays
                 </button>
@@ -267,7 +288,7 @@ export default function App() {
         onSelectCategory={(cat) => {
           setSelectedCategory(cat);
           setShowBookmarksOnly(false);
-          setActiveSlug(null);
+          handleBackToHome();
         }}
         onOpenContact={() => setIsContactOpen(true)}
         onSelectArticle={handleSelectArticle}

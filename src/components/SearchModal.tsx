@@ -35,8 +35,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        if (isOpen) onClose();
-        else onClose(); // parent handles toggle
+        onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -55,7 +54,14 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           art.subtitle.toLowerCase().includes(q) ||
           art.category.toLowerCase().includes(q) ||
           art.summary.toLowerCase().includes(q) ||
-          art.sections.some((s) => s.content.some((c) => c.toLowerCase().includes(q)))
+          art.sections.some(
+            (s) =>
+              s.questionHeading.toLowerCase().includes(q) ||
+              s.quickAnswer.toLowerCase().includes(q) ||
+              s.subsections.some((sub) =>
+                sub.content.some((c) => c.toLowerCase().includes(q))
+              )
+          )
         );
       });
 
@@ -77,13 +83,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search thinkers, principles, or essays... (e.g. Steve Jobs, CUDA, empathy)"
+            placeholder="Search thinkers, questions, or mental models... (e.g. 2x2 grid, CUDA, empathy)"
             className="w-full bg-transparent text-sm sm:text-base text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 mr-2"
+              className="p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 mr-2 cursor-pointer"
               aria-label="Clear search"
             >
               <X className="w-4 h-4" />
@@ -91,7 +97,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           )}
           <button
             onClick={onClose}
-            className="text-xs px-2 py-1 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700"
+            className="text-xs px-2 py-1 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 cursor-pointer"
           >
             Esc
           </button>
@@ -105,7 +111,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           ) : (
             <>
               <div className="px-3 py-1.5 text-[11px] font-medium tracking-wider uppercase text-stone-400 dark:text-stone-500">
-                {query ? `Found ${filtered.length} matches` : 'Recent Highlights'}
+                {query ? `Found ${filtered.length} matches` : 'Featured Case Studies'}
               </div>
               {filtered.map((art) => (
                 <button
@@ -114,7 +120,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     onSelectArticle(art.slug);
                     onClose();
                   }}
-                  className="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800/80 transition-colors flex items-start justify-between group"
+                  className="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800/80 transition-colors flex items-start justify-between group cursor-pointer"
                 >
                   <div className="pr-4">
                     <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 mb-1">
@@ -143,7 +149,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         <div className="px-4 py-2.5 bg-stone-50 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between">
           <span className="flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5 text-stone-400" />
-            10 Curated Essays on World-Changing Success
+            Clean URLs & Indexed Case Studies
           </span>
           <span className="hidden sm:inline">Press Esc to exit</span>
         </div>
